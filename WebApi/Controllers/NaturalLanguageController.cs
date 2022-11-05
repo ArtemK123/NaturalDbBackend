@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 
@@ -10,11 +12,13 @@ public class NaturalLanguageController : ControllerBase
 {
     private readonly IConfiguration configuration;
     private readonly ILogger<NaturalLanguageController> logger;
+    private readonly HttpClient httpClient;
 
-    public NaturalLanguageController(IConfiguration configuration, ILogger<NaturalLanguageController> logger)
+    public NaturalLanguageController(IConfiguration configuration, ILogger<NaturalLanguageController> logger, IHttpClientFactory httpClientFactory)
     {
         this.configuration = configuration;
         this.logger = logger;
+        httpClient = httpClientFactory.CreateClient();
     }
 
     [HttpPost("audio-to-text")]
@@ -48,9 +52,38 @@ public class NaturalLanguageController : ControllerBase
     }
 
     [HttpPost("text-to-command")]
-    public string TextToCommand(string text)
+    public async Task<string> TextToCommand(string text)
     {
-        Console.WriteLine(text);
-        return text;
+        var requestId = Guid.NewGuid().ToString();
+        logger.LogInformation($"[{requestId}]: Starting to covert the text to command. Text: {text}");
+        
+        var openAiConfig = configuration.GetSection("OpenAI");
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, openAiConfig.GetValue<string>("Endpoint"));
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", openAiConfig.GetValue<string>("ApiKey"));
+        request.Content = JsonContent.Create(new
+        {
+            model = openAiConfig.GetValue<string>("Model"),
+            prompt = text,
+            temperature = openAiConfig.GetValue<double>("Temperature"),
+            max_tokens = openAiConfig.GetValue<int>("MaxTokens"),
+            top_p = 1.0,
+            frequency_penalty = 0.0,
+            presence_penalty = 0.0
+        });
+        
+        var response = await httpClient.SendAsync(request);
+        var responseText = await response.Content.ReadAsStringAsync();
+        var responseModel = JsonSerializer.Deserialize<ResponseModel>(responseText);
+
+        var result = responseModel?.choices[0].text ?? "Sorry, I didn't understand that.";
+        
+        logger.LogInformation($"[{requestId}]: Converted command: ${result}");
+        return result;
     }
+
+    record Choice(string text);
+
+    record ResponseModel(Choice[] choices);
 }
+
