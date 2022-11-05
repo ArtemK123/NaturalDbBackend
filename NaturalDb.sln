@@ -12,6 +12,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration", "Configurat
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NaturalDb.OpenAI", "NaturalDb.OpenAI", "{D75B05DA-5B29-44D3-A91A-AE4B04BFEDDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NaturalDb.OpenAI.Extensibility", "NaturalDb.OpenAI.Extensibility\NaturalDb.OpenAI.Extensibility.csproj", "{061A67CB-9E9C-4527-9058-391776B1B76C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NaturalDb.OpenAI.Service", "NaturalDb.OpenAI.Service\NaturalDb.OpenAI.Service.csproj", "{8937C4ED-0106-42B6-A01A-EC202F3067FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,5 +31,17 @@ Global
 		{162450F2-1158-420A-8F19-7659F60011FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{162450F2-1158-420A-8F19-7659F60011FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{162450F2-1158-420A-8F19-7659F60011FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{061A67CB-9E9C-4527-9058-391776B1B76C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{061A67CB-9E9C-4527-9058-391776B1B76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{061A67CB-9E9C-4527-9058-391776B1B76C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{061A67CB-9E9C-4527-9058-391776B1B76C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8937C4ED-0106-42B6-A01A-EC202F3067FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8937C4ED-0106-42B6-A01A-EC202F3067FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8937C4ED-0106-42B6-A01A-EC202F3067FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8937C4ED-0106-42B6-A01A-EC202F3067FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{061A67CB-9E9C-4527-9058-391776B1B76C} = {D75B05DA-5B29-44D3-A91A-AE4B04BFEDDE}
+		{8937C4ED-0106-42B6-A01A-EC202F3067FD} = {D75B05DA-5B29-44D3-A91A-AE4B04BFEDDE}
 	EndGlobalSection
 EndGlobal
