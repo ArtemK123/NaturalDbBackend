@@ -1,4 +1,17 @@
+var localFrontendCorsPolicyName = "LocalFrontendCorsPolicy";
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: localFrontendCorsPolicyName,
+        policy  =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 
 // Add services to the container.
 
@@ -13,6 +26,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseCors(localFrontendCorsPolicyName);
     app.UseSwagger();
     app.UseSwaggerUI();
 }
