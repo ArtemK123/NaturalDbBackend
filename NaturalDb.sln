@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration", "Configurat
 		README.md = README.md
 		LICENSE = LICENSE
 		.gitignore = .gitignore
+		.github\workflows\main_naturaldb-backend.yml = .github\workflows\main_naturaldb-backend.yml
 	EndProjectSection
 EndProject
 Global
