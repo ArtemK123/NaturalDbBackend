@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'production'
+      name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
@@ -52,6 +52,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'naturaldb-backend'
-          slot-name: 'production'
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_cfc473f2eeaf41c4aafe7f9b309c5e1c }}
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_58E89DF99F0A467D9CC55050CECBDB5A }}
           package: .
