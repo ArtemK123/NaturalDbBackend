@@ -1,8 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Audio;
+using Microsoft.Extensions.Options;
 
 namespace WebApi.Controllers;
 
@@ -13,49 +12,49 @@ public class NaturalLanguageController : ControllerBase
     private readonly IConfiguration configuration;
     private readonly ILogger<NaturalLanguageController> logger;
     private readonly HttpClient httpClient;
+    private readonly OpenAiOptions openAiOptions;
 
-    public NaturalLanguageController(IConfiguration configuration, ILogger<NaturalLanguageController> logger, IHttpClientFactory httpClientFactory)
+    public NaturalLanguageController(IConfiguration configuration, ILogger<NaturalLanguageController> logger, IHttpClientFactory httpClientFactory, IOptions<OpenAiOptions> openAiOptionsProvider)
     {
         this.configuration = configuration;
         this.logger = logger;
         httpClient = httpClientFactory.CreateClient();
+        openAiOptions = openAiOptionsProvider.Value;
     }
 
     [HttpPost("audio-to-text")]
-    public async Task<string> AudioToText(IFormFile file)
+    public async Task<string> AudioToText(IFormFile file, CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid().ToString();
-        
-        logger.LogInformation($"[{requestId}]: Starting to covert the audio file '{file.FileName}' to text");
-        
-        if (file.ContentType != "audio/wav")
-        {
-            logger.LogError($"[{requestId}]: The file '{file.FileName}' is not a WAV file");
-            return "The file is not a WAV file";
-        }
-        
-        var tempFileName = Path.GetTempPath() + Guid.NewGuid() + ".wav";
-        await using (var fileStream = new FileStream(tempFileName, FileMode.Create))
-        {
-            await file.CopyToAsync(fileStream);
-        }
-        
-        var speechConfigSectionPath = "Azure:CognitiveServices:Speech";
-        var speechApiKey = configuration.GetSection(speechConfigSectionPath).GetValue<string>("ApiKey");
-        var speechRegion = configuration.GetSection(speechConfigSectionPath).GetValue<string>("Region");
 
-        var speechConfig = SpeechConfig.FromSubscription(speechApiKey, speechRegion);
-        speechConfig.SpeechRecognitionLanguage = "en-US";
-        
-        using var audioInputStream = AudioInputStream.CreatePushStream();
-        using var audioConfig = AudioConfig.FromWavFileInput(tempFileName);
-        using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
-     
-        var result = await recognizer.RecognizeOnceAsync();
+        logger.LogInformation("[{requestId}]: Starting to covert the audio file '{filename}' to text", requestId, file.FileName);
 
-        logger.LogInformation($"[{requestId}]: Converted text: {result.Text}");
-        return result.Text;
+
+        using var fileStream = file.OpenReadStream();
+
+        using var whisperRequest = new HttpRequestMessage(HttpMethod.Post, openAiOptions.WhisperEndpoint);
+        whisperRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", openAiOptions.ApiKey);
+        whisperRequest.Content = new MultipartFormDataContent
+        {
+            { new StreamContent(fileStream), "file", file.FileName },
+            { new StringContent(openAiOptions.WhisperModel), "model" },
+            { new StringContent("en"), "language" }
+        };
+
+        var whisperResponse = await httpClient.SendAsync(whisperRequest, cancellationToken);
+
+        if (!whisperResponse.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException($"Failed to call the Whisper model: '${whisperResponse.StatusCode} {whisperResponse.ReasonPhrase}'");
+        }
+
+        var recognition = (await whisperResponse.Content.ReadFromJsonAsync<WhisperRecognition>(cancellationToken))!;
+
+        logger.LogInformation("[{requestId}]: Successfully converted audio to text. Converted text: {text}", requestId, recognition.Text);
+        return recognition.Text;
     }
+
+    public record WhisperRecognition(string Text);
 
     [HttpPost("text-to-command")]
     public async Task<string> TextToCommand([FromBody] TextToCommandRequest request)

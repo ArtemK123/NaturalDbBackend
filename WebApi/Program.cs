@@ -1,3 +1,5 @@
+using WebApi;
+
 var localFrontendCorsPolicyName = "LocalFrontendCorsPolicy";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
+
+builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection(OpenAiOptions.SectionPath));
 
 var app = builder.Build();
 
