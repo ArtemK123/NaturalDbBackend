@@ -34,7 +34,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(o => {
+    o.EnableTryItOutByDefault();
+});
 
 app.UseHttpsRedirection();
 
