@@ -13,6 +13,10 @@ public class OpenAiOptions
     public string ThreadsEndpoint { get; set; } = null!;
 
     public string TextToSqlAssistantId { get; set; } = null!;
+    
+    public int TextToSqlStatusCheckIntervalInMs { get; set; }
+
+    public int TextToSqlTimeoutInSeconds { get; set; }
 
     public string WhisperEndpoint { get; set; } = null!;
 

@@ -1,4 +1,8 @@
+using System.Reflection;
+using Microsoft.Extensions.Options;
 using WebApi;
+using WebApi.Options;
+using WebApi.Services;
 
 var localFrontendCorsPolicyName = "LocalFrontendCorsPolicy";
 
@@ -22,8 +26,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
 builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection(OpenAiOptions.SectionPath));
+builder.Services.AddTransient<OpenAiOptions>(s => s.GetRequiredService<IOptions<OpenAiOptions>>().Value);
+
+builder.Services.Configure<BigQueryOptions>(builder.Configuration.GetSection(BigQueryOptions.SectionPath));
+builder.Services.AddTransient<BigQueryOptions>(s => s.GetRequiredService<IOptions<BigQueryOptions>>().Value);
+
+builder.Services.AddTransient<IOpenAiMessageSender, OpenAiMessageSender>();
 
 var app = builder.Build();
 
