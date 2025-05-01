@@ -46,5 +46,12 @@ public class NaturalLanguageController : ControllerBase
         var response = await mediator.Send(request, cancellationToken);
         return response;
     }
+
+    [HttpPost("execute-in-starrocks")]
+    public async Task<ExecuteInStarRocksResponse> ExecuteStarRocks([FromBody] ExecuteInStarRocksRequest request, CancellationToken cancellationToken)
+    {
+        var response = await mediator.Send(request, cancellationToken);
+        return response;
+    }
 }
 
